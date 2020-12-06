@@ -1,13 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pegler.Leaderboard.BusinessLogic.Contracts;
+using Pegler.Leaderboard.BusinessLogic.Managers;
+using Pegler.Leaderboard.BusinessLogic.Options;
 
 namespace Pegler.Leaderboard
 {
@@ -23,6 +22,15 @@ namespace Pegler.Leaderboard
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<EndpointOptions>(Configuration.GetSection(EndpointOptions.OptionKey));
+
+            services.AddHttpClient("default");
+
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddTransient<IHttpClientManager, HttpClientManager>();
+            services.AddTransient<IPlayersServiceManager, PlayersServiceManager>();
+
             services.AddControllersWithViews();
         }
 

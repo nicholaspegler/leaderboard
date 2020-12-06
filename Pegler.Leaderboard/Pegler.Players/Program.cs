@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace Pegler.Leaderboard
+namespace Pegler.Players
 {
     public class Program
     {
