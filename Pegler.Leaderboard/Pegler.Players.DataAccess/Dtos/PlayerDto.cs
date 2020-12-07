@@ -14,6 +14,6 @@ namespace Pegler.Players.DataAccess.Dtos
 
         public double Winnings { get; set; }
 
-        public int Country { get; set; }
+        public string Country { get; set; }
     }
 }

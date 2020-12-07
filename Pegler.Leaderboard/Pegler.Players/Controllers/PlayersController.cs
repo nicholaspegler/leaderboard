@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pegler.Players.BusinessLogic.Contracts;
+using Pegler.Players.DataAccess.Dtos;
 using Pegler.Players.ViewModels.Players.GET;
 using Pegler.Players.ViewModels.Players.POST;
 using Pegler.Players.ViewModels.Players.PUT;
@@ -35,7 +36,10 @@ namespace Pegler.Players.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            List<PlayerRespVM> playerRespVMs = new List<PlayerRespVM>();
+            List<PlayerDto> playerDtos = await playerManager.GetAllAsync();
+
+
+            List<PlayerRespVM> playerRespVMs = mapper.Map<List<PlayerDto>, List<PlayerRespVM>>(playerDtos);
 
             return Ok(playerRespVMs);
         }

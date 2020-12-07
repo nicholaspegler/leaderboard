@@ -30,8 +30,7 @@ namespace Pegler.Leaderboard.Controllers
         }
 
 
-        [Route("_Details")]
-        [HttpGet]
+        //[Route("_Details")]
         public async Task<IActionResult> Details()
         {
             // get all

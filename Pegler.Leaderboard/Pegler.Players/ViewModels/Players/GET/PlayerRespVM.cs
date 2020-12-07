@@ -6,8 +6,6 @@ namespace Pegler.Players.ViewModels.Players.GET
     {
         public Guid Id { get; set; }
 
-        public int Rank { get; set; }
-
         public string Name { get; set; }
 
         public double Winnings { get; set; }
