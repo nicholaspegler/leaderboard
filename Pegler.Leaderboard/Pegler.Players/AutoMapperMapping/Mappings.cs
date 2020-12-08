@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
 using Pegler.Players.DataAccess.Dtos;
 using Pegler.Players.ViewModels.Players.GET;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Pegler.Players.ViewModels.Players.POST;
 
 namespace Pegler.Players.AutoMapperMapping
 {
@@ -14,6 +11,11 @@ namespace Pegler.Players.AutoMapperMapping
         {
             CreateMap<PlayerDto, PlayerRespVM>()
                 .ReverseMap();
+
+            CreateMap<PlayerDto, PlayerReqVM>()
+                .ReverseMap()
+                .ForMember(dest => dest.Country, opt => opt.MapFrom(src => src.Country.ToString()));
+
         }
     }
 }

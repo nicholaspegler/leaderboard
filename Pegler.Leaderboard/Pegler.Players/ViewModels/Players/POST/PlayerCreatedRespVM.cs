@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Pegler.Players.ViewModels.Common.POST;
 
 namespace Pegler.Players.ViewModels.Players.POST
 {
-    public class PlayerCreatedRespVM
+    public class PlayerCreatedRespVM : CreatedRespVM
     {
     }
 }

@@ -38,6 +38,10 @@ namespace Pegler.Players.Controllers
         {
             List<PlayerDto> playerDtos = await playerManager.GetAllAsync();
 
+            if (playerDtos?.Any() == false)
+            {
+                return NotFound();
+            }
 
             List<PlayerRespVM> playerRespVMs = mapper.Map<List<PlayerDto>, List<PlayerRespVM>>(playerDtos);
 
@@ -51,7 +55,14 @@ namespace Pegler.Players.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get(Guid id)
         {
-            PlayerRespVM playerRespVM = new PlayerRespVM();
+            PlayerDto playerDto = await playerManager.GetAsync(id);
+
+            if (playerDto == null)
+            {
+                return NotFound();
+            }
+
+            PlayerRespVM playerRespVM = mapper.Map<PlayerDto, PlayerRespVM>(playerDto);
 
             return Ok(playerRespVM);
         }
@@ -64,7 +75,24 @@ namespace Pegler.Players.Controllers
         {
             if (ModelState.IsValid)
             {
+                PlayerDto playerDto = mapper.Map<PlayerReqVM, PlayerDto>(playerReqVM);
 
+                playerDto = await playerManager.CreateAsync(playerDto);
+
+                if (playerDto.Id == Guid.Empty)
+                {
+                    ModelState.AddModelError("Player", $"Failed to create player - {playerReqVM.Name}");
+
+                    return BadRequest(ModelState);
+                }
+
+                PlayerCreatedRespVM playerCreatedRespVM = new PlayerCreatedRespVM()
+                {
+                    Id = playerDto.Id,
+                    Href = $"/api/v1/Players/{playerDto.Id}"
+                };
+
+                return Created(playerCreatedRespVM.Href, playerCreatedRespVM);
             }
 
             return BadRequest(ModelState);
@@ -74,19 +102,31 @@ namespace Pegler.Players.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Put(PlayerUpdReqVM playerUpdReqVM)
         {
             if (ModelState.IsValid)
             {
+                PlayerDto playerDto = await playerManager.GetAsync(playerUpdReqVM.Id);
 
+                if (playerDto == null)
+                {
+                    return NotFound();
+                }
+
+                playerDto.Winnings += playerUpdReqVM.WinningsAdjustment.Value;
+
+                if (await playerManager.UpdateAsync(playerDto))
+                {
+                    return NoContent();
+                }
+
+                ModelState.AddModelError("Player", $"Failed to update playerId - {playerUpdReqVM.Id}");
             }
 
             return BadRequest(ModelState);
         }
 
-        // DELETE api/<PlayersController>/5
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -94,8 +134,21 @@ namespace Pegler.Players.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(Guid id)
         {
+            PlayerDto playerDto = await playerManager.GetAsync(id);
 
-            return NoContent();
+            if (playerDto == null)
+            {
+                return NotFound();
+            }
+
+            if (await playerManager.DeleteAsync(playerDto))
+            {
+                return NoContent();
+            }
+
+            ModelState.AddModelError("Player", $"Failed to delete playerId - {id}");
+
+            return BadRequest(ModelState);
         }
     }
 }

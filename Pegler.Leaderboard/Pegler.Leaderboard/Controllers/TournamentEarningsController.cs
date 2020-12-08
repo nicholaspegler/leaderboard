@@ -115,4 +115,5 @@ namespace Pegler.Leaderboard.Controllers
             }
         }
     }
+
 }
