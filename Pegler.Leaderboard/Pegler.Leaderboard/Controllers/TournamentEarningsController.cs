@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Pegler.Leaderboard.BusinessLogic.Contracts;
 using Pegler.Leaderboard.BusinessLogic.Models.PlayersService.GET;
+using Pegler.Leaderboard.BusinessLogic.Models.PlayersService.POST;
+using Pegler.Leaderboard.BusinessLogic.Models.PlayersService.PUT;
 using Pegler.Leaderboard.Models.TournamentEarnings;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pegler.Leaderboard.Controllers
@@ -23,97 +26,71 @@ namespace Pegler.Leaderboard.Controllers
             this.playersServiceManager = playersServiceManager;
         }
 
-
         public async Task<IActionResult> Index()
         {
-            return View();
-        }
-
-
-        //[Route("_Details")]
-        public async Task<IActionResult> Details()
-        {
-            // get all
-
-            (List<PlayerRespM> PlayerRespMs, ModelStateDictionary modelStateDictionary) = await playersServiceManager.GetAllAsync(ModelState);
+            (List<PlayerRespM> playerRespMs, ModelStateDictionary modelStateDictionary) = await playersServiceManager.GetAllAsync(ModelState);
 
             if (modelStateDictionary.IsValid)
             {
-                List<PlayerVM> playerVMs = mapper.Map<List<PlayerRespM>, List<PlayerVM>>(PlayerRespMs);
+                List<PlayerVM> playerVMs = mapper.Map<List<PlayerRespM>, List<PlayerVM>>(playerRespMs);
+
+                int ranking = 1;
+                playerVMs.OrderByDescending(o => o.Winnings)
+                         .Select(s => { s.Rank = ranking++; return s; })
+                         .ToList();
 
                 PlayersVM playersVM = new PlayersVM()
                 {
                     Players = playerVMs
                 };
 
-                return PartialView("_Details", playersVM);
+                return View(playersVM);
             }
 
-            return PartialView("_Details");
+            return View();
         }
 
-        [Route("_Create")]
-        [HttpGet]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            try
-            {
-
-                Country[] countries = Country.List;
-
-
-                return PartialView("_Create");
-            }
-            catch
-            {
-                return View();
-            }
+            return View();
         }
 
-        // POST: TournamentEarningsController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IFormCollection collection)
+        public async Task<IActionResult> Create(CreatePlayerVM createPlayerVM)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                PlayerReqM playerReqM = mapper.Map<CreatePlayerVM, PlayerReqM>(createPlayerVM);
+
+                (PlayerCreatedRespM playerCreatedRespM, ModelStateDictionary modelStateDictionary) = await playersServiceManager.CreateAsync(playerReqM, ModelState);
+
+                if (modelStateDictionary.IsValid)
+                {
+                    return RedirectToAction("Index");
+                }
             }
-            catch
-            {
-                return View();
-            }
+
+            return View(ModelState);
         }
 
-        // POST: TournamentEarningsController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(EditPlayerVM editPlayerVM)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                PlayerUpdReqM playerUpdReqM = mapper.Map<EditPlayerVM, PlayerUpdReqM>(editPlayerVM);
 
-        // POST: TournamentEarningsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+                (bool success, ModelStateDictionary modelStateDictionary) = await playersServiceManager.UpdateAsync(playerUpdReqM, ModelState);
+
+                if (modelStateDictionary.IsValid)
+                {
+                    return RedirectToAction("Index");
+                }
             }
-            catch
-            {
-                return View();
-            }
+
+            return RedirectToAction("Index", ModelState);
         }
     }
-
 }

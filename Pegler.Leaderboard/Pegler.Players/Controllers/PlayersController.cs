@@ -107,7 +107,7 @@ namespace Pegler.Players.Controllers
         {
             if (ModelState.IsValid)
             {
-                PlayerDto playerDto = await playerManager.GetAsync(playerUpdReqVM.Id);
+                PlayerDto playerDto = await playerManager.GetAsync(playerUpdReqVM.Id.Value);
 
                 if (playerDto == null)
                 {

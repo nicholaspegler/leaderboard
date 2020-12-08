@@ -6,5 +6,8 @@ namespace Pegler.Leaderboard.BusinessLogic.Models.PlayersService.PUT
 {
     public class PlayerUpdReqM
     {
+        public Guid Id { get; set; }
+
+        public double WinningsAdjustment { get; set; }
     }
 }

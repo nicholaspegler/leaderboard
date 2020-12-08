@@ -1,0 +1,31 @@
+﻿@using ISO3166;
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" asp-controller="TournamentEarnings" asp-action="Create">
+            <div class="alert alert-danger" style="display:none;">
+                <button type="button" class="close">&times;</button>
+                @Html.ValidationSummary()
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" name="name">
+            </div>
+            <div class="mb-3">
+                <label for="winnings" class="form-label">Winnings</label>
+                <input type="number" class="form-control" name="winnings">
+            </div>
+            <div class="mb-3">
+                <label for="country" class="form-label">Native Of</label>
+                <select class="form-select form-control" name="country">
+                    <option selected disabled>Select Country</option>
+                    @foreach (var country in Country.List)
+                    {
+                        <option value="@country.ThreeLetterCode">@country.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>

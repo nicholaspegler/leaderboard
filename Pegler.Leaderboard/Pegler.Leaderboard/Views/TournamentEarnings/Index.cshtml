@@ -3,15 +3,71 @@
     ViewData["Title"] = "Index";
 }
 
-<div>
+@using System.Globalization;
 
-    <h1>All-Time Tournament Earnings</h1>
+@model Pegler.Leaderboard.Models.TournamentEarnings.PlayersVM
 
-
-    @{ await Html.RenderPartialAsync("Details"); }
-
-
-
+<div class="card">
+    <div class="card-body">
+        <h3 class="card-title">All-Time Tournament Earnings</h3>
+        <div class="alert alert-danger" style="display:none;">
+            <button type="button" class="close">&times;</button>
+            @Html.ValidationSummary()
+        </div>
+        <table class="table shadow my-2">
+            <thead class="thead-dark">
+                <tr>
+                    <th colspan="2">Player</th>
+                    <th>Winnings</th>
+                    <th>Native Of</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null)
+                {
+                    foreach (var player in Model.Players.OrderBy(o => o.Rank))
+                    {
+                        <tr>
+                            <td>@player.Rank</td>
+                            <td>
+                                <button class="editplayer btn btn-link p-0" data-toggle="modal" data-target="#editPlayer" data-id="@player.Id" data-name="@player.Name">@player.Name</button>
+                            </td>
+                            <td>@player.Winnings.ToString("C", CultureInfo.CreateSpecificCulture("en-US"))</td>
+                            <td>@player.Country</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4">No players here</td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="4"><a class="btn btn-primary btn-sm" asp-controller="TournamentEarnings" asp-action="Create">Add Player</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-
+<div class="modal fade" id="editPlayer" tabindex="-1" aria-labelledby="editPlayerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPlayerModalLabel">Edit</h5>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-controller="TournamentEarnings" asp-action="Edit">
+                    <input type="hidden" name="id" id="playerId" />
+                    <div class="mb-3">
+                        <label for="winnings" class="form-label">Add Winnings</label>
+                        <input type="number" class="form-control" name="winnings">
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
